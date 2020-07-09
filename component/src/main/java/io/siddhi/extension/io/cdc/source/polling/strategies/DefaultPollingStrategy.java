@@ -77,7 +77,7 @@ public class DefaultPollingStrategy extends PollingStrategy {
                 }
             }
 
-            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ?");
+            selectQuery = getSelectQuery("*", "WHERE " + pollingColumn + " > ? ORDER BY " + pollingColumn + " ASC");
             statement = connection.prepareStatement(selectQuery);
 
             while (true) {
@@ -95,7 +95,11 @@ public class DefaultPollingStrategy extends PollingStrategy {
                 }
                 try {
                     statement.setString(1, lastReadPollingColumnValue);
+                    
+                    log.info(String.format("Polling data sql: [select * where %s > %s order by %s asc]", pollingColumn, lastReadPollingColumnValue, pollingColumn));
+                    
                     resultSet = statement.executeQuery();
+                    
                     metadata = resultSet.getMetaData();
                     while (resultSet.next()) {
                         detailsMap = new HashMap<>();
